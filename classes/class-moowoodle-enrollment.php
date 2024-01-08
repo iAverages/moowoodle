@@ -172,7 +172,7 @@ class MooWoodle_Enrollment {
 	 */
 	private function enrol_moodle_user($moowoodle_moodle_user_id, $suspend = 0) {
 		$wc_order = $this->wc_order;
-		if (empty($moowoodle_moodle_user_id) || !is_int($moowoodle_moodle_user_id)) {
+		if (empty($moowoodle_moodle_user_id) || !is_numeric($moowoodle_moodle_user_id)) {
 			return;
 		}
 		$enrolments = $this->get_enrollment_data($moowoodle_moodle_user_id, $suspend);
@@ -231,9 +231,10 @@ class MooWoodle_Enrollment {
 	 */
 	public function update_course_access($subscription, $new_status, $old_status) {
 		$suspend_for_status = apply_filters('moowoodle_suspend_course_access_for_subscription', array('on-hold', 'cancelled', 'expired'));
+		$valid_old_status = array('pending-cancel', 'active');
 		$create_moodle_user = false;
 		$suspend = 0;
-		if ($old_status == 'active' && in_array($new_status, $suspend_for_status)) {
+		if (in_array($old_status, $valid_old_status) && in_array($new_status ,$suspend_for_status) ) {
 			$create_moodle_user = false;
 			$suspend = 1;
 		} else if ($new_status == 'active') {
@@ -249,6 +250,9 @@ class MooWoodle_Enrollment {
 			echo esc_html_e('Please check your mail or go to My Courses page to access your courses.', 'moowoodle');
 		} else {
 			echo esc_html_e('Order status is :- ', 'moowoodle') . $order->get_status() . '<br>';
+		}
+		if ($this->wc_order == null) {
+			$this->wc_order = $subscription;
 		}
 	}
 	public function add_dates_with_product() {
