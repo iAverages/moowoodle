@@ -243,6 +243,7 @@ class MooWoodle_Enrollment {
 			$create_moodle_user = true;
 			$suspend = 0;
 		}
+        $this->wc_order = $subscription;
 		$moowoodle_moodle_user_id = $this->get_moodle_user_id($create_moodle_user);
 		$this->enrol_moodle_user($moowoodle_moodle_user_id, $suspend);
 	}
