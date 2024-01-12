@@ -188,7 +188,7 @@ class MooWoodle_Enrollment {
 		moowoodle_moodle_core_function_callback('enrol_users', array('enrolments' => $enrolments));
 		$wc_order->update_meta_data('moodle_user_enrolled', "true");
 		$wc_order->update_meta_data('moodle_user_enrolment_date', time());
-		$wc_order->save();
+		$wc_order->save_meta_data();
 		// send confirmation email
 		do_action('moowoodle_after_enrol_moodle_user', $enrolment_data);
 	}
@@ -243,7 +243,7 @@ class MooWoodle_Enrollment {
 			$create_moodle_user = true;
 			$suspend = 0;
 		}
-        $this->wc_order = $subscription;
+		$this->wc_order = $subscription;
 		$moowoodle_moodle_user_id = $this->get_moodle_user_id($create_moodle_user);
 		$this->enrol_moodle_user($moowoodle_moodle_user_id, $suspend);
 	}
