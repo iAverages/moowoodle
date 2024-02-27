@@ -46,7 +46,7 @@ class MooWoodle_Enrollment {
 		$moowoodle_moodle_user_id = 0;
 		$conn_settings = $MooWoodle->options_general_settings;
 		if ($user_id) {
-			$moodle_user_id_meta = get_user_meta($user_id, 'moowoodle_moodle_user_id', true);
+			$moodle_user_id_meta = $MooWoodle->moowoodle_pro_adv || empty(get_user_meta($user_id, 'moowoodle_moodle_user_id')) ? get_user_meta($user_id, 'moowoodle_moodle_user_id') : wordpress_user_sync_to_moodle(get_userdata($user_id));
 			if (empty($moodle_user_id_meta)) {
 				//Metadata not found
 				$moowoodle_moodle_user_id = $this->search_for_moodle_user('email', $user->user_email);
@@ -207,15 +207,15 @@ class MooWoodle_Enrollment {
 		$role_id = apply_filters('moowoodle_enrolled_user_role_id', 5);
 		if (!empty($items)) {
 			foreach ($items as $item) {
-				$course_id = get_post_meta($item['product_id'], 'moodle_course_id', true);
+				$course_id = get_post_meta($item->get_product_id(), 'moodle_course_id', true);
 				if (!empty($course_id)) {
 					$enrolment = array();
 					$enrolment['courseid'] = intval($course_id);
 					$enrolment['userid'] = $moowoodle_moodle_user_id;
 					$enrolment['roleid'] = $role_id;
 					$enrolment['suspend'] = $suspend;
-					$enrolment['linked_course_id'] = get_post_meta($item['product_id'], 'linked_course_id', true);
-					$enrolment['course_name'] = get_the_title($item['product_id']);
+					$enrolment['linked_course_id'] = get_post_meta($item->get_product_id(), 'linked_course_id', true);
+					$enrolment['course_name'] = get_the_title($item->get_product_id());
 					$enrolments[] = $enrolment;
 				}
 			}
@@ -232,6 +232,8 @@ class MooWoodle_Enrollment {
 	 * @return void
 	 */
 	public function update_course_access($subscription, $new_status, $old_status) {
+		$order_id = $subscription->get_parent_id();
+		$this->wc_order = wc_get_order( $order_id );
 		$suspend_for_status = apply_filters('moowoodle_suspend_course_access_for_subscription', array('on-hold', 'cancelled', 'expired'));
 		$valid_old_status = array('pending-cancel', 'active');
 		$create_moodle_user = false;
@@ -265,11 +267,11 @@ class MooWoodle_Enrollment {
 		$display_settings = $MooWoodle->options_display_settings;
 		if (isset($display_settings['start_end_date']) && $display_settings['start_end_date'] == "Enable") {
 			if ($startdate) {
-				echo esc_html_e("Start Date : ", 'moowoodle') . esc_html_e(date('Y-m-d', $startdate), 'moowoodle');
+				echo esc_html_e("Start Date : ", 'moowoodle') . esc_html_e(gmdate('Y-m-d', $startdate), 'moowoodle');
 			}
 			print_r("<br>");
 			if ($enddate) {
-				echo esc_html_e("End Date : ", 'moowoodle') . esc_html_e(date('Y-m-d', $enddate), 'moowoodle');
+				echo esc_html_e("End Date : ", 'moowoodle') . esc_html_e(gmdate('Y-m-d', $enddate), 'moowoodle');
 			}
 		}
 	}

@@ -2,13 +2,15 @@
 class MooWoodle_Library {
 	public function moowoodle_get_options() {
 		global $MooWoodle;
+		$user_sync_running_cron_batch = apply_filters('moowoodle_sync_user_corn_info', '');
+		$sync_wordpress_users = apply_filters('add_moowoodle_sync_wordpress_users_roles','');
 		$conn_settings = get_option('moowoodle_general_settings');
 		$url = isset($conn_settings['moodle_url']) ? $conn_settings['moodle_url'] : '';
 		$pro_sticker = '';
 		$woocom_new_user_mail = '<a href="'. site_url() .'/wp-admin/admin.php?page=wc-settings&tab=email&section=moowoodle_emails_new_enrollment">here!</a>';
 		if ($url != null) {
-			$moodle_tokens_url = '<a href="' . $url . 'admin/webservice/tokens.php"> ' . __('Manage tokens', 'moowoodle') . '</a>';
-			$moodle_sso_url = '<a href="' . $url . 'admin/settings.php?section=auth_moowoodleconnect"> ' . __('Moodle', 'moowoodle') . '</a>';
+			$moodle_tokens_url = '<a href="' . $url . '/admin/webservice/tokens.php"> ' . __('Manage tokens', 'moowoodle') . '</a>';
+			$moodle_sso_url = '<a href="' . $url . '/admin/settings.php?section=auth_moowoodleconnect"> ' . __('Moodle', 'moowoodle') . '</a>';
 			$moowoodle_sync_setting_url = '<a href="' . get_admin_url() . '/admin.php?page=moowoodle-synchronization&tab=moowoodle-sync-options"> ' . __('Synchronization Settings', 'moowoodle') . '</a>';
 		} else {
 			$moodle_tokens_url = __('Manage tokens', 'moowoodle');
@@ -340,7 +342,8 @@ class MooWoodle_Library {
 									"label" => __("Synchronize Option", 'moowoodle'),
 									"field_types" => array(
 										"sync-all-user-options" => array(
-											"type" => "multiple-checkboxs",
+											"type" => "select",
+											"name" => "sync_users_now",
 											"label" => __("Existing Users", 'moowoodle'),
 											"desc" => __("<b>Prior to updating existing user info, you must seclect the user info to be synchronized at </b>", 'moowoodle') . $moowoodle_sync_setting_url . __("<br><br>While synchronizing user information, we use the email address as the unique identifier for each user. We check the username associated with that email address, and if we find the same username in the other instance but with a different email address, the user's information cannot be synchronized.", 'moowoodle') ,
 											"desc_posi" => "up",
@@ -348,13 +351,13 @@ class MooWoodle_Library {
 												'Moodle &rArr; WordPress' => array(
 													"id" => "sync-moodle-users",
 													"name" => "sync_moodle_users",
-													"desc" => __("", 'moowoodle'),
+													"desc" =>$user_sync_running_cron_batch . __("", 'moowoodle'),
 													"is_pro" => "pro",
 												),
 												'WordPress &rArr; Moodle' => array(
 													"id" => "sync-wordpress-users",
 													"name" => "sync_wordpress_users",
-													"desc" => __("To update passwords for users created before activating the plugin, they must log in once to migrate their passwords to the new hashing method. After this step, the admin can synchronize their passwords from WordPress to Moodle.If the user doesn't log in, all other fields will be synchronized except for the password.", 'moowoodle'),
+													"desc" => $user_sync_running_cron_batch . $sync_wordpress_users . __("<br>To update passwords for users created before activating the plugin, they must log into WorPress site to migrate their passwords to the new hashing method. After this step, it will synchronize their passwords from WordPress to Moodle.If the user doesn't log in, all other fields will be synchronized except for the password.", 'moowoodle'),
 													"is_pro" => "pro",
 												),
 											),
